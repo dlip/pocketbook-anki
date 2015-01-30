@@ -1,0 +1,16 @@
+{
+  "name": "pocketbook-anki",
+  "version": "1.0.0",
+  "description": "",
+  "main": "convert.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "MD5": "^1.2.1",
+    "cheerio": "^0.18.0",
+    "csv-write-stream": "^0.3.0"
+  }
+}

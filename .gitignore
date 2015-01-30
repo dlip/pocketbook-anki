@@ -1,0 +1,4 @@
+*.log
+*.xhtml
+node_modules
+Thumbs.db
