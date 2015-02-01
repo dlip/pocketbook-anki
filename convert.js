@@ -1,7 +1,8 @@
 var fs = require("fs");
 var cheerio = require('cheerio');
 var md5 = require('MD5');
-var csvWriter = require('csv-write-stream')
+var csvWriter = require('csv-write-stream');
+var gm = require('gm');
 
 var filename = process.argv[2];
 var outDir = 'out';
@@ -11,31 +12,39 @@ var xhtmlData = fs.readFileSync(filename, "utf8");
 
 var $ = cheerio.load(xhtmlData);
 
-var csvData = [];
-
 var total = $('.bookmark').length;
+var csvData = new Array(total);
 
+var count = 0;
+var nextid = 0;
 $('.bookmark').each(function(index, elem) {
+	var id = nextid;
+	nextid++;
 	encImg = $(elem).find('img').first().attr('src');
-	var pageNo = $(elem).find('.bm-page').first().text();
-	var note = $(elem).find('.bm-note').first().text();
+	var noteElem = $(elem).find('.bm-note > p').first();
+	noteElem.find('br').replaceWith('\n');
+	var note = noteElem.text();
 	var imageBuffer = decodeBase64Image(encImg);
-	var imageFilename = md5(imageBuffer.data) + '.jpg';
-	var imageLocation = outDir + '/' + imageFilename;
-    
-    fs.exists(imageLocation, function(exists) {
-    	if (!exists) {
-			fs.writeFile(imageLocation, imageBuffer.data, function(err) {
-				if(err)
-					console.log(err);
-				console.log('Wrote ' + imageLocation);
-			});
-		}
+	gm(imageBuffer.data, 'image.jpg').toBuffer('JPG', function(err, buffer) {
+		if(err)
+			console.log(err);
+		var imageFilename = md5(buffer) + '.jpg';
+		var imageLocation = outDir + '/' + imageFilename;
+
+	    fs.exists(imageLocation, function(exists) {
+	    	if (true) {
+				fs.writeFile(imageLocation, buffer, function(err) {
+					if(err)
+						console.log(err);
+					console.log('Wrote ' + imageLocation);
+				});
+			}
+		});
+		csvData[id] = {imageFilename: '<img src="' + imageFilename + '"/>', note: note};
+		count++;
+		if(count == total)
+			writeCsv( csvData );
 	});
-	csvData.push({note: note, imageFilename: imageFilename, pageNo: pageNo});
-	if(csvData.length == total) {
-		writeCsv( csvData );
-	}
 });
 
 function decodeBase64Image(dataString) {
