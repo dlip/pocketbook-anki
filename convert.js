@@ -24,6 +24,8 @@ $('.bookmark').each(function(index, elem) {
 	var noteElem = $(elem).find('.bm-note > p').first();
 	noteElem.find('br').replaceWith('\n');
 	var note = noteElem.text();
+	note = note.replace(/^\n|\n$/, "");
+	note = note.replace(/\n/g, "<br />");
 	var imageBuffer = decodeBase64Image(encImg);
 	gm(imageBuffer.data, 'image.jpg').toBuffer('JPG', function(err, buffer) {
 		if(err)
